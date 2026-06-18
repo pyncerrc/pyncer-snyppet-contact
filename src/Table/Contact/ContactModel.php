@@ -60,13 +60,13 @@ class ContactModel extends AbstractModel
         return $this;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->get('name');
     }
-    public function setName(?string $value): static
+    public function setName(string $value): static
     {
-        $this->set('name', $this->nullify($value));
+        $this->set('name', $value);
         return $this;
     }
 
@@ -130,7 +130,7 @@ class ContactModel extends AbstractModel
             'mark' => null,
             'insert_date_time' => $dateTime,
             'update_date_time' => null,
-            'name' => null,
+            'name' => '',
             'alias' => null,
             'verify' => false,
             'private' => false,

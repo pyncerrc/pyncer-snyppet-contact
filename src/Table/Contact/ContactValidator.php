@@ -49,9 +49,9 @@ class ContactValidator extends AbstractValidator
 
         $this->addRules(
             'name',
+            RequiredRule(),
             new StringRule(
                 maxLength: 50,
-                allowNull: true,
             ),
         );
 
