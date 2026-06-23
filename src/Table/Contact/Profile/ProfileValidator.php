@@ -6,6 +6,8 @@ use Pyncer\Database\ConnectionInterface;
 use Pyncer\Snyppet\Contact\Table\Contact\ContactMapper;
 use Pyncer\Validation\Rule\BoolRule;
 use Pyncer\Validation\Rule\DateTimeRule;
+use Pyncer\Validation\Rule\IdRule;
+use Pyncer\Validation\Rule\IntRule;
 use Pyncer\Validation\Rule\EmailRule;
 use Pyncer\Validation\Rule\PhoneRule;
 use Pyncer\Validation\Rule\RequiredRule;
@@ -91,6 +93,16 @@ class ProfileValidator extends AbstractValidator
                 maxLength: 25,
                 allowNull: true,
             ),
+        );
+
+        $this->addRules(
+            'email_verified',
+            new BoolRule(),
+        );
+
+        $this->addRules(
+            'phone_verified',
+            new BoolRule(),
         );
 
         $this->addRules(

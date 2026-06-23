@@ -5,6 +5,7 @@ use Pyncer\App\Identifier as ID;
 use Pyncer\Component\Module\AbstractGetIndexModule;
 use Pyncer\Data\Mapper\MapperInterface;
 use Pyncer\Data\MapperQuery\MapperQueryInterface;
+use Pyncer\Data\Model\ModelInterface;
 use Pyncer\Snyppet\Contact\Table\Contact\Profile\ProfileMapper;
 use Pyncer\Snyppet\Contact\Table\Contact\Profile\ProfileMapperQuery;
 use Pyncer\Snyppet\Contact\Table\Contact\Profile\ProfileModel;
@@ -21,5 +22,24 @@ class GetProfileIndexModule extends AbstractGetIndexModule
     {
         $connection = $this->get(ID::DATABASE);
         return new ProfileMapperQuery($connection, $this->request);
+    }
+
+    protected function getResponseItemData(ModelInterface $model): array
+    {
+        $data = parent::getResponseItemData($model);
+
+        if (array_key_exists('contact_uid', $data) &&
+            $data['contact_uid'] === null
+        ) {
+            $connection = $this->get(ID::DATABASE);
+            $data['contact_uid'] = $connection->select('contact')
+                ->columns('uid')
+                ->where([
+                    'id' => $model->getContactId(),
+                ])
+                ->value();
+        }
+
+        return $data;
     }
 }

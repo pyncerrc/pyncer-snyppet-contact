@@ -100,6 +100,26 @@ class ProfileModel extends AbstractModel
         return $this;
     }
 
+    public function getEmailVerified(): bool
+    {
+        return $this->get('email_verified');
+    }
+    public function setEmailVerified(bool $value): static
+    {
+        $this->set('email_verified', $value);
+        return $this;
+    }
+
+    public function getPhoneVerified(): bool
+    {
+        return $this->get('phone_verified');
+    }
+    public function setPhoneVerified(bool $value): static
+    {
+        $this->set('phone_verified', $value);
+        return $this;
+    }
+
     public function getPending(): bool
     {
         return $this->get('pending');
@@ -134,6 +154,8 @@ class ProfileModel extends AbstractModel
             'name' => null,
             'email' => null,
             'phone' => null,
+            'email_verified' => false,
+            'phone_verified' => false,
             'pending' => false,
             'enabled' => true,
         ];

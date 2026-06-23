@@ -120,9 +120,29 @@ class ProfileMapperQuery extends AbstractRequestMapperQuery
             case 'phone':
             case 'enabled':
             case 'pending':
+            case 'insert_date_time':
+            case 'update_date_time':
                 return true;
         }
 
        return parent::isValidOrderBy($key, $direction);
+    }
+
+    protected function getOrderByColumn(
+        SelectQueryInterface $query,
+        string $key,
+        string $direction
+    ): array
+    {
+        switch ($key) {
+            case 'update_date_time':
+                $function = $this->getConnection()->functions(
+                    'contact__profile',
+                    'Coalesce'
+                )->arguments('update_date_time', 'insert_date_time');
+                return [$function, $direction];
+        }
+
+        return parent::getOrderByColumn($query, $key, $direction);
     }
 }

@@ -2,9 +2,38 @@
 namespace Pyncer\Snyppet\Contact\Table\Contact;
 
 use Pyncer\Data\MapperQuery\AbstractRequestMapperQuery;
+use Pyncer\Data\Model\ModelInterface;
+use Pyncer\Database\Record\SelectQueryInterface;
 
 class ContactMapperQuery extends AbstractRequestMapperQuery
 {
+    public function overrideModel(
+        ModelInterface $model,
+        array $data
+    ): ModelInterface
+    {
+        if ($this->getOptions() === null) {
+            return $model;
+        }
+
+        if ($this->getOptions()->hasOption('include-profile-status')) {
+            $total = intval($data['total_items']);
+            $pending = intval($data['pending_items']);
+            $enabled = intval($data['enabled_items']);
+
+            $model->addExtraData([
+                'profile_status' => [
+                    'total' => $total,
+                    'pending' => $pending,
+                    'enabled' => $enabled,
+                    'disabled' => $total - $pending - $enabled,
+                ]
+            ]);
+        }
+
+        return $model;
+    }
+
     protected function isValidFilter(
         string $left,
         mixed $right,
@@ -56,15 +85,98 @@ class ContactMapperQuery extends AbstractRequestMapperQuery
         return parent::isValidFilter($left, $right, $operator);
     }
 
+    protected function isValidOption(string $option): bool
+    {
+        switch ($option) {
+            case 'include-profile-status':
+                return true;
+        }
+
+        return parent::isValidOption($option);
+    }
+
+    protected function applyOption(
+        SelectQueryInterface $query,
+        string $option
+    ): SelectQueryInterface
+    {
+        if ($option === 'include-profile-status') {
+            $query->leftJoinOn(
+                ['contact__profile', 'contact__profile__total'],
+                [
+                    ['contact_id', 'id'],
+                ]
+            );
+
+            $query->leftJoinOn(
+                ['contact__profile', 'contact__profile__pending'],
+                [
+                    ['contact_id', 'id'],
+                    ['pending', [null, true]],
+                    ['enabled', [null, true]],
+                ]
+            );
+
+            $query->leftJoinOn(
+                ['contact__profile', 'contact__profile__enabled'],
+                [
+                    ['contact_id', 'id'],
+                    ['pending', [null, false]],
+                    ['enabled', [null, true]],
+                ]
+            );
+
+            $totalCountFunction = $this->getConnection()->functions('contact__profile__total', 'Count', )
+                ->arguments(['contact__profile__total', 'id']);
+
+            $pendingCountFunction = $this->getConnection()->functions('contact__profile__pending', 'Count', )
+                ->arguments(['contact__profile__pending', 'id']);
+
+            $enabledCountFunction = $this->getConnection()->functions('contact__profile__enabled', 'Count', )
+                ->arguments(['contact__profile__enabled', 'id']);
+
+            $query->columns(
+                    [$totalCountFunction, 'total_items'],
+                    [$pendingCountFunction, 'pending_items'],
+                    [$enabledCountFunction, 'enabled_items'],
+                )
+                ->groupBy('id');
+
+            return $query;
+        }
+
+        return parent::applyOption($query, $option);
+    }
+
     protected function isValidOrderBy(string $key, string $direction): bool
     {
         switch ($key) {
             case 'name':
             case 'alias':
             case 'enabled':
+            case 'insert_date_time':
+            case 'update_date_time':
                 return true;
         }
 
        return parent::isValidOrderBy($key, $direction);
+    }
+
+    protected function getOrderByColumn(
+        SelectQueryInterface $query,
+        string $key,
+        string $direction
+    ): array
+    {
+        switch ($key) {
+            case 'update_date_time':
+                $function = $this->getConnection()->functions(
+                    'contact',
+                    'Coalesce'
+                )->arguments('update_date_time', 'insert_date_time');
+                return [$function, $direction];
+        }
+
+        return parent::getOrderByColumn($query, $key, $direction);
     }
 }

@@ -22,4 +22,23 @@ class GetProfileItemModule extends AbstractGetItemModule
         $connection = $this->get(ID::DATABASE);
         return new ProfileMapperQuery($connection);
     }
+
+    protected function getResponseItemData(ModelInterface $model): array
+    {
+        $data = parent::getResponseItemData($model);
+
+        if (array_key_exists('contact_uid', $data) &&
+            $data['contact_uid'] === null
+        ) {
+            $connection = $this->get(ID::DATABASE);
+            $data['contact_uid'] = $connection->select('contact')
+                ->columns('uid')
+                ->where([
+                    'id' => $model->getContactId(),
+                ])
+                ->value();
+        }
+
+        return $data;
+    }
 }
