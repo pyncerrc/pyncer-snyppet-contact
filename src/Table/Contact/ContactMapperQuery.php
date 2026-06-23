@@ -102,38 +102,34 @@ class ContactMapperQuery extends AbstractRequestMapperQuery
     {
         if ($option === 'include-profile-status') {
             $query->leftJoinOn(
-                ['contact__profile', 'contact__profile__total'],
+                'contact__profile',
                 [
                     ['contact_id', 'id'],
                 ]
             );
 
-            $query->leftJoinOn(
-                ['contact__profile', 'contact__profile__pending'],
-                [
-                    ['contact_id', 'id'],
-                    ['pending', [null, true]],
-                    ['enabled', [null, true]],
-                ]
-            );
+            $totalCountFunction = $this->getConnection()->functions('contact__profile', 'Count')
+                ->arguments(['contact__profile', 'id']);
 
-            $query->leftJoinOn(
-                ['contact__profile', 'contact__profile__enabled'],
-                [
-                    ['contact_id', 'id'],
-                    ['pending', [null, false]],
-                    ['enabled', [null, true]],
-                ]
-            );
+            $pendingCaseFunction = $this->getConnection()->functions('contact__profile', 'Case')
+                ->when([
+                    'pending' => true,
+                    'enabled' => false,
+                ])
+                ->then(1);
 
-            $totalCountFunction = $this->getConnection()->functions('contact__profile__total', 'Count', )
-                ->arguments(['contact__profile__total', 'id']);
+            $pendingCountFunction = $this->getConnection()->functions('contact__profile', 'Count')
+                ->arguments($pendingCaseFunction);
 
-            $pendingCountFunction = $this->getConnection()->functions('contact__profile__pending', 'Count', )
-                ->arguments(['contact__profile__pending', 'id']);
+            $enabledCaseFunction = $this->getConnection()->functions('contact__profile', 'Case')
+                ->when([
+                    'pending' => false,
+                    'enabled' => true,
+                ])
+                ->then(1);
 
-            $enabledCountFunction = $this->getConnection()->functions('contact__profile__enabled', 'Count', )
-                ->arguments(['contact__profile__enabled', 'id']);
+            $enabledCountFunction = $this->getConnection()->functions('contact__profile', 'Count')
+                ->arguments($enabledCaseFunction);
 
             $query->columns(
                     [$totalCountFunction, 'total_items'],
