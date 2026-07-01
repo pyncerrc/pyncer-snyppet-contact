@@ -94,4 +94,72 @@ class Install extends AbstractInstall
 
         return true;
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function hasRelated(string $snyppetAlias): bool
+    {
+        switch ($snyppetAlias) {
+            case 'organization':
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function safeInstallRelated(string $snyppetAlias): bool
+    {
+        switch ($snyppetAlias) {
+            case 'organization':
+                return $this->installOrganization();
+        }
+
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function safeUninstallRelated(string $snyppetAlias): bool
+    {
+        switch ($snyppetAlias) {
+            case 'organization':
+                return $this->uninstallOrganization();
+        }
+
+        return false;
+    }
+
+    protected function installOrganization(): bool
+    {
+        $this->connection->createTable('contact__organization')
+            ->serial('id')
+            ->int('contact_id', IntSize::BIG)->index()
+            ->int('organization_id', IntSize::BIG)->index()
+            ->index('#unique', 'contact_id')->unique()
+            ->foreignKey(null, 'contact_id')
+                ->references('contact', 'id')
+                ->deleteAction(ReferentialAction::CASCADE)
+                ->updateAction(ReferentialAction::CASCADE)
+            ->foreignKey(null, 'organization_id')
+                ->references('organization', 'id')
+                ->deleteAction(ReferentialAction::CASCADE)
+                ->updateAction(ReferentialAction::CASCADE)
+            ->execute();
+
+        return true;
+    }
+
+    protected function uninstallOrganization(): bool
+    {
+        if ($this->connection->hasTable('contact__organization')) {
+            $this->connection->dropTable('contact__organization');
+        }
+
+        return true;
+    }
 }

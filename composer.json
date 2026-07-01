@@ -13,7 +13,8 @@
         "pyncer/database": "^1.0.1",
         "pyncer/http": "^1.0.3",
         "pyncer/snyppet": "^1.1.0",
-        "pyncer/validation": "^1.1.0"
+        "pyncer/validation": "^1.1.0",
+        "pyncer/snyppet-content": "^1.0.0"
     },
     "autoload": {
         "files": ["src/autoload.php"],

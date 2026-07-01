@@ -14,9 +14,9 @@ use Pyncer\Validation\Rule\RequiredRule;
 use Pyncer\Validation\Rule\StringRule;
 use Pyncer\Validation\Rule\UidRule;
 
-use const Pyncer\Snyppet\Contact\PROFILE_PHONE_ALLOW_E164 as PYNCER_CONTACT_PROFILE_PHONE_ALLOW_E164;
-use const Pyncer\Snyppet\Contact\PROFILE_PHONE_ALLOW_NANP as PYNCER_CONTACT_PROFILE_PHONE_ALLOW_NANP;
-use const Pyncer\Snyppet\Contact\PROFILE_PHONE_ALLOW_FORMATTING as PYNCER_CONTACT_PROFILE_PHONE_ALLOW_FORMATTING;
+use const Pyncer\Snyppet\Contact\PHONE_ALLOW_E164 as PYNCER_CONTACT_PHONE_ALLOW_E164;
+use const Pyncer\Snyppet\Contact\PHONE_ALLOW_NANP as PYNCER_CONTACT_PHONE_ALLOW_NANP;
+use const Pyncer\Snyppet\Contact\PHONE_ALLOW_FORMATTING as PYNCER_CONTACT_PHONE_ALLOW_FORMATTING;
 
 class ProfileValidator extends AbstractValidator
 {
@@ -85,9 +85,9 @@ class ProfileValidator extends AbstractValidator
         $this->addRules(
             'phone',
             new PhoneRule(
-                allowNanp: PYNCER_CONTACT_PROFILE_PHONE_ALLOW_NANP,
-                allowE164: PYNCER_CONTACT_PROFILE_PHONE_ALLOW_E164,
-                allowFormatting: PYNCER_CONTACT_PROFILE_PHONE_ALLOW_FORMATTING,
+                allowNanp: PYNCER_CONTACT_PHONE_ALLOW_NANP,
+                allowE164: PYNCER_CONTACT_PHONE_ALLOW_E164,
+                allowFormatting: PYNCER_CONTACT_PHONE_ALLOW_FORMATTING,
             ),
             new StringRule(
                 maxLength: 25,
